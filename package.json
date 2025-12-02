@@ -15,10 +15,7 @@
     "build": "tsc",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/ironblood/npm-remote-ls.git"
-  },
+  "repository": "https://github.com/IronBlood/npm-remote-ls",
   "keywords": [
     "npm",
     "ls",
@@ -35,9 +32,9 @@
   ],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ironblood/npm-remote-ls/issues"
+    "url": "https://github.com/IronBlood/npm-remote-ls/issues"
   },
-  "homepage": "https://github.com/ironblood/npm-remote-ls",
+  "homepage": "https://github.com/IronBlood/npm-remote-ls",
   "publishConfig": {
     "access": "public"
   },
