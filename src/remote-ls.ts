@@ -119,11 +119,13 @@ export class RemoteLS {
       const x = this.flatMap.get(fullName);
       if (x.type === task.type || task.type === DependantType.optional) {
         // if same type or current type is optional, skip
-        const parent = this.flatMap.get(task.parent);
-        if (!parent) {
-          throw new Error(`parent[${task.parent}] of ${fullName} should exist `);
+        if (task.parent) {
+          const parent = this.flatMap.get(task.parent);
+          if (!parent) {
+            throw new Error(`parent[${task.parent}] of ${fullName} should exist`);
+          }
+          parent.children.push(x);
         }
-        parent.children.push(x);
         return [];
       } else {
         // in this situation, the original x.type is optional, and should

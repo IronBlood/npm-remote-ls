@@ -109,7 +109,6 @@ describe("RemoteLS", () => {
       next_queue = ls._walkDependencies({
         name: "nopt",
         version: "1.0.0",
-        parent: "foo",
         type: DependantType.default,
       }, packageJson);
       expect(next_queue.length).toBe(0);
