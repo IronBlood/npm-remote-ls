@@ -3,7 +3,7 @@ import { hideBin } from "yargs/helpers";
 import registryUrl from "registry-url";
 import npa from "npm-package-arg";
 
-import { ls } from "./index";
+import { ls } from "./index.js";
 
 const argv = yargs(hideBin(process.argv))
 	.usage("$0 <pkg-name> [options]")

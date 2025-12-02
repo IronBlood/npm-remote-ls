@@ -1,7 +1,7 @@
 import {
 	RemoteLSCfg,
 	RemoteLS,
-} from "./remote-ls";
+} from "./remote-ls.js";
 
 interface LsOpts {
 	name: string;
