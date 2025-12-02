@@ -38,6 +38,9 @@
     "url": "https://github.com/ironblood/npm-remote-ls/issues"
   },
   "homepage": "https://github.com/ironblood/npm-remote-ls",
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@jest/globals": "^29",
     "@types/jest": "^29",
