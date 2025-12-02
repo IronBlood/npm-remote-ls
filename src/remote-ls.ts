@@ -285,7 +285,21 @@ export class RemoteLS {
     console.log(treeify.asTree(root[keys[0]], false, false));
   }
 
+  _dump_optionals() {
+    const optionals = [...this.optionals];
+    if (optionals.length > 0) {
+      console.log("Optional Dependencies:")
+      console.log("----------------------");
+
+      optionals.sort();
+      for (const o of optionals) {
+        console.log(`- ${o}`);
+      }
+    }
+  }
+
   dump() {
     this._dump_tree();
+    this._dump_optionals();
   }
 }
