@@ -23,6 +23,13 @@
     "dependency"
   ],
   "author": "Ben Coe <ben@npmjs.com>",
+  "maintainers": [
+    {
+      "name": "Yang Shen",
+      "email": "aplshenyang@gmail.com",
+      "url": "https://github.com/IronBlood"
+    }
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ironblood/npm-remote-ls/issues"
