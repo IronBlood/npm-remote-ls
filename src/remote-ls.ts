@@ -265,7 +265,9 @@ export class RemoteLS {
     const root = {};
 
     const dfs = (d: DependTreeNode, n: any) => {
-      const name = d.name;
+      const name = d.type === DependantType.optional
+        ? `(o) ${d.name}`
+        : d.name;
       n = (n[name] = {});
       for (const c of d.children) {
         dfs(c, n);
