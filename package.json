@@ -4,7 +4,7 @@
   "description": "Examine a package's dependency graph before you install it",
   "main": "./dist/index.js",
   "bin": {
-    "npm-remote-ls": "./dist/npm-remote-ls.js"
+    "npm-remote-ls": "dist/npm-remote-ls.js"
   },
   "type": "module",
   "types": "./dist/index.d.ts",
