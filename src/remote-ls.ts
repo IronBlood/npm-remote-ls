@@ -276,7 +276,13 @@ export class RemoteLS {
 
     dfs(this.tree, root);
 
-    console.log(treeify.asTree(root, false, false));
+    const keys = Object.keys(root);
+    if (keys.length !== 1) {
+      throw new Error(`Expect 1 root, but got ${keys.length}`);
+    }
+
+    console.log(keys[0]);
+    console.log(treeify.asTree(root[keys[0]], false, false));
   }
 
   dump() {
