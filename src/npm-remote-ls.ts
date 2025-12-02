@@ -12,12 +12,6 @@ const argv = yargs(hideBin(process.argv))
 		type: "string",
 		description: "package name",
 	})
-	.options("pkg-version", {
-		alias: "v",
-		description: "package version",
-		type: "string",
-		default: "latest",
-	})
 	.options("verbose", {
 		alias: "e",
 		type: "boolean",
@@ -27,31 +21,19 @@ const argv = yargs(hideBin(process.argv))
 	.options("development", {
 		alias: "d",
 		description: "show development dependencies",
-		default: true,
-		boolean: true,
-	})
-	.options("optional", {
-		alias: "o",
-		description: "show optional dependencies",
-		default: true,
+		default: false,
 		boolean: true,
 	})
 	.options("peer", {
 		alias: "p",
 		description: "show peer dependencies",
-		default: false,
+		default: true,
 		boolean: true,
 	})
 	.options("registry", {
 		alias: "r",
 		description: "set an alternative registry url",
 		default: registryUrl(),
-	})
-	.options("flatten", {
-		alias: "f",
-		description: "return flat representation of dependencies",
-		default: false,
-		boolean: true
 	})
 	.help()
 	.alias("h", "help")
@@ -61,20 +43,11 @@ const parsed = npa(argv.name);
 
 ls({
 	name: parsed.name,
-	version: parsed.rawSpec || argv["pkg-version"],
-	flatten: argv.flatten,
+	version: parsed.rawSpec,
 	cfg: {
 		verbose: argv.verbose,
 		development: argv.development,
-		optional: argv.optional,
 		peer: argv.peer,
 		registry: argv.registry,
 	},
-	cb: obj => {
-		if (Array.isArray(obj)) {
-			console.log("TODO");
-		} else {
-			console.log("TODO");
-		}
-	}
 });
