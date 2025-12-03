@@ -42,10 +42,15 @@ const argv = yargs(hideBin(process.argv))
 	.parseSync();
 
 const parsed = npa(argv.name);
+const target = parsed.type === "alias"
+	? (parsed as npa.AliasResult).subSpec
+	: parsed;
+const name = target?.name ?? parsed.name ?? argv.name;
+const version = target?.rawSpec ?? parsed.rawSpec;
 
 ls({
-	name: parsed.name,
-	version: parsed.rawSpec,
+	name,
+	version,
 	cfg: {
 		verbose: argv.verbose,
 		development: argv.development,

@@ -9,4 +9,7 @@ export default {
 			diagnostics: false,
 		}],
 	},
+	moduleNameMapper: {
+		"^(\\.{1,2}/.*)\\.js$": "$1",
+	},
 };

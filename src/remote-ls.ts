@@ -1,7 +1,8 @@
 import registryUrl from "registry-url";
 import semver from "semver";
 import npa from "npm-package-arg";
-import treeify from "treeify";
+
+import { asTree } from "./treeify.js";
 
 interface PackageVersion {
   name: string;
@@ -40,7 +41,7 @@ interface QueueNode {
   type: DependantType;
 }
 
-interface DependTreeNode {
+export interface DependTreeNode {
   name: string;
   type: DependantType;
   children: DependTreeNode[];
@@ -55,7 +56,6 @@ export class RemoteLS {
   verbose: boolean;
   tree: DependTreeNode;
   flatMap: Map<string, DependTreeNode>;
-  queue: QueueNode[];
   optionals: Set<string>;
 
   constructor(cfg: RemoteLSCfg = {}) {
@@ -69,7 +69,6 @@ export class RemoteLS {
       children: [],
     };
     this.flatMap = new Map();
-    this.queue = [];
     this.optionals = new Set();
   }
 
@@ -164,48 +163,39 @@ export class RemoteLS {
 
     const nextTasks: QueueNode[] = [];
 
-    // dependencies is always included
-    for (const [name, range] of Object.entries(entry.dependencies ?? {})) {
-      nextTasks.push({
-        name,
-        version: range,
-        type: DependantType.default,
-        parent: fullName,
-      });
-    }
+    const enqueue_deps = (deps: Record<string, string> | undefined, type: DependantType) => {
+      for (const [name, spec] of Object.entries(deps ?? {})) {
+        const parsed = npa(spec.startsWith("npm:") ? spec :`${name}@${spec}`);
+        const target = parsed.type === "alias" ? (parsed as npa.AliasResult).subSpec : (parsed as npa.Result);
+        if (!["tag", "range", "version"].includes(target.type)) {
+          if (this.verbose) {
+            console.log(`skipping non-registry spec ${spec} for ${name} from ${fullName}`);
+          }
+          continue;
+        }
 
-    // optional is included as well, but won't be visited
-    for (const [name, range] of Object.entries(entry.optionalDependencies ?? {})) {
-      nextTasks.push({
-        name,
-        version: range,
-        type: DependantType.optional,
-        parent: fullName
-      });
-    }
-
-    if (this.development && !task.parent) {
-      for (const [name, range] of Object.entries(entry.devDependencies ?? {})) {
         nextTasks.push({
-          name,
-          version: range,
-          // only dev dependencies of the root package will be included as default
-          type: DependantType.default,
-          parent: fullName
+          name: target.name,
+          version: target.rawSpec ?? spec,
+          type,
+          parent: fullName,
         });
       }
+    };
+
+    // dependencies is always included
+    enqueue_deps(entry.dependencies, DependantType.default);
+
+    // optional is included as well, but won't be visited
+    enqueue_deps(entry.optionalDependencies, DependantType.optional);
+
+    if (this.development && !task.parent) {
+      enqueue_deps(entry.devDependencies, DependantType.default);
     }
 
     // starting from npm v7, peer dependencies are always included, recursively
     if (this.peer) {
-      for (const [name, range] of Object.entries(entry.peerDependencies ?? {})) {
-        nextTasks.push({
-          name,
-          version: range,
-          type: DependantType.default,
-          parent: fullName
-        });
-      }
+      enqueue_deps(entry.peerDependencies, DependantType.default);
     }
 
     if (this.verbose) {
@@ -237,17 +227,18 @@ export class RemoteLS {
   }
 
   async ls(name: string, version: string) {
-    this.queue.push({
+    let queue: QueueNode[] = [];
+    queue.push({
       name,
       version,
       type: DependantType.default,
     });
 
     // BFS
-    while (this.queue.length > 0) {
+    while (queue.length > 0) {
       const next_queue: QueueNode[] = [];
 
-      await Promise.all(this.queue.map(async task => {
+      await Promise.all(queue.map(async task => {
         const json = await this._loadPackageJson(task);
         if (json) {
           const next_tasks = this._walkDependencies(task, json);
@@ -257,32 +248,13 @@ export class RemoteLS {
         }
       }));
 
-      this.queue = next_queue;
+      queue = next_queue;
     }
   }
 
   _dump_tree() {
-    const root = {};
-
-    const dfs = (d: DependTreeNode, n: any) => {
-      const name = d.type === DependantType.optional
-        ? `(o) ${d.name}`
-        : d.name;
-      n = (n[name] = {});
-      for (const c of d.children) {
-        dfs(c, n);
-      }
-    };
-
-    dfs(this.tree, root);
-
-    const keys = Object.keys(root);
-    if (keys.length !== 1) {
-      throw new Error(`Expect 1 root, but got ${keys.length}`);
-    }
-
-    console.log(keys[0]);
-    console.log(treeify.asTree(root[keys[0]], false, false));
+    console.log(this.tree.name);
+    console.log(asTree(this.tree, false, false));
   }
 
   _dump_optionals() {
