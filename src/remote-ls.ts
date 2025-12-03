@@ -56,7 +56,6 @@ export class RemoteLS {
   verbose: boolean;
   tree: DependTreeNode;
   flatMap: Map<string, DependTreeNode>;
-  queue: QueueNode[];
   optionals: Set<string>;
 
   constructor(cfg: RemoteLSCfg = {}) {
@@ -70,7 +69,6 @@ export class RemoteLS {
       children: [],
     };
     this.flatMap = new Map();
-    this.queue = [];
     this.optionals = new Set();
   }
 
@@ -229,17 +227,18 @@ export class RemoteLS {
   }
 
   async ls(name: string, version: string) {
-    this.queue.push({
+    let queue: QueueNode[] = [];
+    queue.push({
       name,
       version,
       type: DependantType.default,
     });
 
     // BFS
-    while (this.queue.length > 0) {
+    while (queue.length > 0) {
       const next_queue: QueueNode[] = [];
 
-      await Promise.all(this.queue.map(async task => {
+      await Promise.all(queue.map(async task => {
         const json = await this._loadPackageJson(task);
         if (json) {
           const next_tasks = this._walkDependencies(task, json);
@@ -249,7 +248,7 @@ export class RemoteLS {
         }
       }));
 
-      this.queue = next_queue;
+      queue = next_queue;
     }
   }
 
