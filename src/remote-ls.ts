@@ -1,7 +1,8 @@
 import registryUrl from "registry-url";
 import semver from "semver";
 import npa from "npm-package-arg";
-import treeify from "treeify";
+
+import { asTree } from "./treeify.js";
 
 interface PackageVersion {
   name: string;
@@ -40,7 +41,7 @@ interface QueueNode {
   type: DependantType;
 }
 
-interface DependTreeNode {
+export interface DependTreeNode {
   name: string;
   type: DependantType;
   children: DependTreeNode[];
@@ -253,27 +254,8 @@ export class RemoteLS {
   }
 
   _dump_tree() {
-    const root = {};
-
-    const dfs = (d: DependTreeNode, n: any) => {
-      const name = d.type === DependantType.optional
-        ? `(o) ${d.name}`
-        : d.name;
-      n = (n[name] = {});
-      for (const c of d.children) {
-        dfs(c, n);
-      }
-    };
-
-    dfs(this.tree, root);
-
-    const keys = Object.keys(root);
-    if (keys.length !== 1) {
-      throw new Error(`Expect 1 root, but got ${keys.length}`);
-    }
-
-    console.log(keys[0]);
-    console.log(treeify.asTree(root[keys[0]], false, false));
+    console.log(this.tree.name);
+    console.log(asTree(this.tree, false, false));
   }
 
   _dump_optionals() {
